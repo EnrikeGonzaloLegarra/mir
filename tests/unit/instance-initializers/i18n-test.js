@@ -14,6 +14,7 @@ const fastbootServiceFactory = Service.extend({
 
 const i18nServiceFactory = Service.extend({
   locale: null,
+  locales: ['en', 'ja', 'zh-cn'],
 });
 
 moduleFor('instance-initializer:i18n', 'Unit | Instance Initializer | i18n', {
@@ -40,7 +41,7 @@ test('detectLocale correctly returns `en-US`', function(assert) {
   i18n.initialize(this.appInstance);
   let service = this.appInstance.lookup('service:i18n');
   let locale = get(service, 'locale');
-  assert.equal(locale, 'en-US');
+  assert.equal(locale, 'en', 'expected en');
 });
 
 test('detectLocale correctly returns `en-US` in FastBoot', function(assert) {
@@ -56,5 +57,21 @@ test('detectLocale correctly returns `en-US` in FastBoot', function(assert) {
 
   let i18nService = this.appInstance.lookup('service:i18n');
   let locale = get(i18nService, 'locale');
-  assert.equal(locale, 'en-US');
+  assert.equal(locale, 'en');
+});
+
+test('detectLocale correctly returns `en` in FastBoot for unsupported language', function(assert) {
+  const mockRequest = EmberObject.create({
+    headers: EmberObject.create({
+      'Accept-Language': 'fo-BA',
+    }),
+  });
+  let fastBoot = this.appInstance.lookup('service:fastboot');
+  set(fastBoot, 'request', mockRequest);
+  set(fastBoot, 'isFastBoot', 'true');
+  i18n.initialize(this.appInstance);
+
+  let i18nService = this.appInstance.lookup('service:i18n');
+  let locale = get(i18nService, 'locale');
+  assert.equal(locale, 'en');
 });
